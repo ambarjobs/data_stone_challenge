@@ -101,11 +101,6 @@ shell: ## Python shell inside app container.
 	@docker-compose exec -it app /usr/local/bin/bpython3
 
 # --------------------------------------------------------------------------------------------------
-#.PHONY: prep-dev
-#prep-dev: ## Prepare inside environment for development.
-#	@docker-compose exec -it app /deploy/prep_dev
-
-# --------------------------------------------------------------------------------------------------
 .PHONY: delete_bytecode
 delete_bytecode: # Remove Python bytecode compiled files
 	@docker-compose exec app find . -name "*.pyc" -delete
