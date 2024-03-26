@@ -1,0 +1,18 @@
+FROM postgres:16.2
+
+WORKDIR /deploy
+
+# Copy database initialization script.
+COPY ./db_files/init_postgresql /deploy
+
+# RUN mkdir -p /docker-entrypoint-initdb.d
+# COPY ./db_files/init_postgresql /docker-entrypoint-initdb.d
+
+
+# Updates image packages.
+RUN apt-get update
+
+# Creates and set a locale file.
+RUN apt-get install -y locales
+RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
+RUN locale-gen en_US.UTF-8

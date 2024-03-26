@@ -1,0 +1,10 @@
+#! /usr/bin/bash
+
+set -e
+
+# Creates the app database and user.
+psql -v ON_ERROR_STOP=1 -U postgres -d postgres <<-EOSQL
+	CREATE USER "$APP_DB_USER" WITH PASSWORD '"$APP_DB_PASSWORD"';
+	CREATE DATABASE "$APP_DATABASE";
+	GRANT ALL PRIVILEGES ON DATABASE "$APP_DATABASE" TO "$APP_DB_USER";
+EOSQL

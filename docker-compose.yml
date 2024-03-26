@@ -1,0 +1,147 @@
+version: "3.5"
+
+services:
+
+  postgresql:
+    container_name: ds-db
+    restart: always
+    build:
+      context: .
+      dockerfile: ${PWD}/dockerfiles/PostgreSQLDockerfile
+    env_file:
+      - .env
+    environment:
+      PGDATA: /var/lib/postgresql/data
+      APP_USER: ${APP_DB_USER}
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD}
+      APP_DATABASE: ${APP_DATABASE}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "${APP_DATABASE}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 7s
+    ports:
+      - "5432:5432"
+    volumes:
+      - /var/lib/postgresql/data
+      # - ${PWD}/services/demo-data:/demo-data
+    networks:
+      - ds-net
+
+  redis:
+    container_name: ds-redis
+    image: redis:7.2.4-bookworm
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 4s
+    ports:
+      - "6379:6379"
+    networks:
+      - ds-net
+
+  app:
+    container_name: ds-app
+    depends_on:
+      postgresql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    links:
+      - postgresql
+      - redis
+    build:
+      dockerfile: ${PWD}/dockerfiles/AppDockerfile
+      context: ${PWD}/src
+    env_file:
+      - .env
+    environment:
+      APP_USER: ${APP_DB_USER}
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD}
+      APP_DATABASE: ${APP_DATABASE}
+    ports:
+      - "80:80"
+    volumes:
+      - ${PWD}/src:/deploy
+    networks:
+      - ds-net
+
+networks:
+  ds-net:
+    driver: bridge
+
+# ==================================================================================================
+  # couchdb:
+  #   container_name: evt-drv-couchdb
+  #   environment:
+  #     - COUCHDB_USER=${COUCHDB_USER}
+  #     - COUCHDB_PASSWORD=${COUCHDB_PASSWORD}
+  #     - COUCHDB_APP_USER=${COUCHDB_APP_USER}
+  #     - COUCHDB_APP_PASSWORD=${COUCHDB_APP_PASSWORD}
+  #   build:
+  #     context: .
+  #     dockerfile: ${PWD}/dockerfiles/CouchDBDockerfile
+  #   healthcheck:
+  #     test: ['CMD', 'curl', '-f', 'http://localhost:5984/']
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 5
+  #     start_period: 10s
+  #   ports:
+  #     - "5984:5984"
+  #   networks:
+  #     - evt-drv-net
+
+  # rabbitmq:
+  #   container_name: evt-drv-rabbitmq
+  #   image: rabbitmq:3.12-management
+  #   healthcheck:
+  #     test: ['CMD', 'rabbitmq-diagnostics', '-q', 'check_running']
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 5
+  #     start_period: 15s
+  #   ports:
+  #     - "5672:5672"
+  #     - "15672:15672"
+  #   networks:
+  #     - evt-drv-net
+
+#   app:
+#     container_name: evt-drv-app
+#     depends_on:
+#       rabbitmq:
+#         condition: service_healthy
+#       couchdb:
+#         # condition: service_healthy
+#         condition: service_healthy
+#     links:
+#       - rabbitmq
+#       - couchdb
+#     build:
+#       dockerfile: ${PWD}/dockerfiles/AppDockerfile
+#       context: ${PWD}/src
+#     environment:
+#       - COUCHDB_USER=${COUCHDB_USER}
+#       - COUCHDB_PASSWORD=${COUCHDB_PASSWORD}
+#       - COUCHDB_APP_USER=${COUCHDB_APP_USER}
+#       - COUCHDB_APP_PASSWORD=${COUCHDB_APP_PASSWORD}
+#       - APP_ADM_USER=${APP_ADM_USER}
+#       - APP_ADM_PASSWORD=${APP_ADM_PASSWORD}
+#       - ACCESS_TOKEN_SECRET_KEY=${ACCESS_TOKEN_SECRET_KEY}
+#       - PAYMENT_PROVIDER_API_KEY=${PAYMENT_PROVIDER_API_KEY}
+#       - PAYMENT_PROVIDER_ENCRYPTION_KEY=${PAYMENT_PROVIDER_ENCRYPTION_KEY}
+#     ports:
+#       - "1984:1984"
+#       - "80:80"
+#     volumes:
+#       - ${PWD}/src:/deploy
+#     networks:
+#       - evt-drv-net
+
+# networks:
+#   evt-drv-net:
+#     driver: bridge
