@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    'api',
 ]
 
 MIDDLEWARE = [
@@ -127,3 +128,14 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+#===================================================================================================
+#   Application specific
+#===================================================================================================
+
+# This simple exchange rates API that doesn't uses an API key
+# (usually they're paid and untransferable even if free).
+EXCHANGE_RATES_API_URL = 'https://cdn.moeda.info/api/latest.json'
+
+# Exchange rates external API requests timeout.
+EXCHANGE_RATES_API_TIMEOUT = 5
