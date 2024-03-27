@@ -80,8 +80,8 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": os.getenv('APP_DATABASE'),
         "USER": os.getenv('APP_DB_USER'),
-        "PASSWORD": os.getenv('APP_DATABASE'),
-        "HOST": os.getenv('DATABASE_HOST'),
+        "PASSWORD": os.getenv('APP_DB_PASSWORD'),
+        "HOST": 'ds-db',
         "PORT": os.getenv('DATABASE_PORT'),
     }
 }
