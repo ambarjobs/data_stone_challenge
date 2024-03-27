@@ -12,6 +12,7 @@ services:
       - .env
     environment:
       PGDATA: /var/lib/postgresql/data
+      DATABASE_PORT: ${DATABASE_PORT}
       APP_USER: ${APP_DB_USER}
       APP_DB_PASSWORD: ${APP_DB_PASSWORD}
       APP_DATABASE: ${APP_DATABASE}
@@ -22,7 +23,7 @@ services:
       retries: 5
       start_period: 7s
     ports:
-      - "5432:5432"
+      - "5432:${DATABASE_PORT}"
     volumes:
       - /var/lib/postgresql/data
     networks:
@@ -58,9 +59,12 @@ services:
     env_file:
       - .env
     environment:
+      DATABASE_HOST: ${DATABASE_HOST}
+      DATABASE_PORT: ${DATABASE_PORT}
       APP_USER: ${APP_DB_USER}
       APP_DB_PASSWORD: ${APP_DB_PASSWORD}
       APP_DATABASE: ${APP_DATABASE}
+      APP_SECRET_KEY: ${APP_SECRET_KEY}
     ports:
       - "80:80"
     volumes:
