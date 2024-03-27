@@ -21,8 +21,5 @@ RUN python3 -m pip install --upgrade pip
 # Installs requirements (you can install manually requirements-dev.txt in your local environment).
 RUN pip3 install -r requirements.txt
 
-# Run migrations.
-CMD ["python3", "/deploy/manage.py", "migrate"]
-
 # Starts Django server.
 CMD ["python3", "/deploy/manage.py", "runserver", "0.0.0.0:8000"]

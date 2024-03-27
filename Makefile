@@ -34,6 +34,8 @@ build: validate_env ## Build images and start the containers.
 	@docker-compose exec postgresql ./init_postgresql
 # Start remaining containers
 	@docker-compose up -d
+# Make initial migrations
+	@docker-compose exec app python3 ./manage.py migrate
 
 # --------------------------------------------------------------------------------------------------
 .PHONY: start
@@ -132,3 +134,20 @@ inside-db: ## Reach OS shell inside PostgreSQL container.
 .PHONY: init-db
 init-db: ## Initialize PostgreSQL and create app user.
 	@docker-compose exec postgresql ./init_postgresql
+
+# ==================================================================================================
+#  Django commands
+# --------------------------------------------------------------------------------------------------
+.PHONY: makemigrations
+makemigrations: ## Generate migrations.
+	@docker-compose exec app python3 ./manage.py makemigrations
+
+# --------------------------------------------------------------------------------------------------
+.PHONY: migrate app
+migrate: ## Apply migrations.
+	@docker-compose exec app python3 ./manage.py migrate $(app)
+
+# --------------------------------------------------------------------------------------------------
+.PHONY: showmigrations app
+showmigrations: ## Show current migrations.
+	@docker-compose exec app python3 ./manage.py showmigrations $(app)
