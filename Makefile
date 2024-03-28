@@ -4,14 +4,8 @@ include .env
 
 POSTGRESQL_SETUP_DELAY = 10
 
-all:
-	@echo "Try 'make help'"
-
-# --------------------------------------------------------------------------------------------------
-.PHONY: help
-help: ## Makefile help.
-	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST) | sort
-
+# ==================================================================================================
+#  Build commands
 # --------------------------------------------------------------------------------------------------
 .PHONY: validate_env
 validate_env: ## Validate docker environment requirements.
@@ -35,17 +29,7 @@ build: validate_env ## Build images and start the containers.
 # Start remaining containers
 	@docker-compose up -d
 # Make initial migrations
-	@docker-compose exec app python3 ./manage.py migrate
-
-# --------------------------------------------------------------------------------------------------
-.PHONY: start
-start: ## Start containers.
-	@docker-compose up -d
-
-# --------------------------------------------------------------------------------------------------
-.PHONY: stop
-stop: ## Stop containers.
-	@docker-compose stop
+	@docker-compose exec app ./manage.py migrate
 
 # --------------------------------------------------------------------------------------------------
 .PHONY: reset-build
@@ -64,6 +48,27 @@ reset-containers: ## Destroy and recreate all containers from last built images.
 remove: ## Remove all containers and wipe all data
 	@docker-compose down
 
+# ==================================================================================================
+#  General commands
+# --------------------------------------------------------------------------------------------------
+all:
+	@echo "Try 'make help'"
+
+# --------------------------------------------------------------------------------------------------
+.PHONY: help
+help: ## Makefile help.
+	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST) | sort
+
+# --------------------------------------------------------------------------------------------------
+.PHONY: start
+start: ## Start containers.
+	@docker-compose up -d
+
+# --------------------------------------------------------------------------------------------------
+.PHONY: stop
+stop: ## Stop containers.
+	@docker-compose stop
+
 # --------------------------------------------------------------------------------------------------
 .PHONY: restart
 restart: ## Restart all containers
@@ -73,20 +78,18 @@ restart: ## Restart all containers
 
 .DEFAULT_GOAL := help
 
-# ==================================================================================================
-#  General commands
 # --------------------------------------------------------------------------------------------------
 .PHONY: status
 status: ## Show status of the containers.
 	@docker-compose ps --format 'table {{.Name}}\t{{.Service}}\t{{.Status}}'
 
+# ==================================================================================================
+#  App commands
 # --------------------------------------------------------------------------------------------------
 .PHONY: logs service
 logs: ## Show status of the containers.
 	@docker-compose logs -t -f ${service}
 
-# ==================================================================================================
-#  App commands
 # --------------------------------------------------------------------------------------------------
 .PHONY: app_status
 app_status: ## Show status of the app container.
@@ -96,11 +99,6 @@ app_status: ## Show status of the app container.
 .PHONY: inside
 inside: ## Reach OS shell inside app container.
 	@docker-compose exec -it app /bin/bash
-
-# --------------------------------------------------------------------------------------------------
-.PHONY: shell
-shell: ## Python shell inside app container.
-	@docker-compose exec -it app /usr/local/bin/bpython3
 
 # --------------------------------------------------------------------------------------------------
 .PHONY: delete_bytecode
@@ -124,6 +122,27 @@ else
 endif
 
 # ==================================================================================================
+#  Django commands
+# --------------------------------------------------------------------------------------------------
+.PHONY: makemigrations
+makemigrations: ## Generate migrations.
+	@docker-compose exec app ./manage.py makemigrations
+
+# --------------------------------------------------------------------------------------------------
+.PHONY: migrate app
+migrate: ## Apply migrations.
+	@docker-compose exec app ./manage.py migrate $(app)
+
+# --------------------------------------------------------------------------------------------------
+.PHONY: showmigrations app
+showmigrations: ## Show current migrations status.
+	@docker-compose exec app ./manage.py showmigrations $(app)
+# --------------------------------------------------------------------------------------------------
+.PHONY: shell
+shell: ## Django shell inside app container.
+	@docker-compose exec app ./manage.py shell
+
+# ==================================================================================================
 #  PostgreSQL commands
 # --------------------------------------------------------------------------------------------------
 .PHONY: inside-db
@@ -132,22 +151,5 @@ inside-db: ## Reach OS shell inside PostgreSQL container.
 
 # --------------------------------------------------------------------------------------------------
 .PHONY: init-db
-init-db: ## Initialize PostgreSQL and create app user.
+init-db: ## Initialize PostgreSQL (ERASE all data) and create app user.
 	@docker-compose exec postgresql ./init_postgresql
-
-# ==================================================================================================
-#  Django commands
-# --------------------------------------------------------------------------------------------------
-.PHONY: makemigrations
-makemigrations: ## Generate migrations.
-	@docker-compose exec app python3 ./manage.py makemigrations
-
-# --------------------------------------------------------------------------------------------------
-.PHONY: migrate app
-migrate: ## Apply migrations.
-	@docker-compose exec app python3 ./manage.py migrate $(app)
-
-# --------------------------------------------------------------------------------------------------
-.PHONY: showmigrations app
-showmigrations: ## Show current migrations.
-	@docker-compose exec app python3 ./manage.py showmigrations $(app)
