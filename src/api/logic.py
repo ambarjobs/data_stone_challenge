@@ -4,7 +4,6 @@
 
 import httpx
 from dataclasses import dataclass
-from datetime import datetime
 from json.decoder import JSONDecodeError
 
 from django.conf import settings
@@ -24,7 +23,7 @@ class OutputStatus:
 
 
 # --------------------------------------------------------------------------------------------------
-#   Output status
+#   Business logic
 # --------------------------------------------------------------------------------------------------
 @dataclass
 class ExchangeApi:
@@ -36,6 +35,17 @@ class ExchangeApi:
     def __post_init__(self):
         self.exchange_rates = {}
         self.last_update = None
+
+    def _process_data(self, data) -> None:
+        """Process and validate API data."""
+        self.last_update = data.get('lastupdate')
+        self.last_update_iso = self.last_update.isoformat()
+
+        self.exchange_rates = {
+            currency_name: float(exchange_rate)
+            for currency_name, exchange_rate in data.get('rates').items()
+            if currency_name in settings.CURRENCY_LIST
+        }
 
     def get_exchange_rates(self) -> OutputStatus:
         """Get the exchange rates with the external API."""
@@ -55,28 +65,18 @@ class ExchangeApi:
                 data={'error': f'Invalid JSON: {err}'},
             )
 
-        try:
-            exchange_serializer = ExchangeApiInputSerializer(data=result_data)
-            if not exchange_serializer.is_valid():
-                raise ValueError
-
-            last_update_iso = result_data.get('lastupdate')
-            self.last_update = datetime.fromisoformat(last_update_iso)
-
-            self.exchange_rates = {
-                currency_name: float(exchange_rate)
-                for currency_name, exchange_rate in result_data.get('rates').items()
-                if currency_name in settings.CURRENCY_LIST
-            }
-        except (TypeError, ValueError) as err:
+        exchange_serializer = ExchangeApiInputSerializer(data=result_data)
+        if not exchange_serializer.is_valid():
             return OutputStatus(
                 status='invalid_api_data_error',
                 error=True,
-                data={'error': f'Invalid API response: {err}'},
+                data={'error': {'Invalid API response': exchange_serializer.errors}},
             )
+
+        self._process_data(data=exchange_serializer.validated_data)
 
         return OutputStatus(
             status='ok',
             error=False,
-            data={'exchange_rates': self.exchange_rates, 'updated': last_update_iso},
+            data={'exchange_rates': self.exchange_rates, 'updated': self.last_update_iso},
         )
