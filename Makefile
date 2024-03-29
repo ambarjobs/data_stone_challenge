@@ -107,16 +107,14 @@ delete_bytecode: # Remove Python bytecode compiled files
 	@docker-compose exec app find . -name "__pycache__" -delete
 
 # --------------------------------------------------------------------------------------------------
-.PHONY: test file class test_name module
-test: # Execute test suite, optionally restricted to a `file`, `class`, `test_name` or `module`.
-ifdef module
-	@docker-compose exec app pytest -k ${module}
-else ifdef test_name
-	@docker-compose exec app pytest tests/${file}::${class}::${test_name}
+.PHONY: test class test_name module
+test: # Execute test suite, optionally restricted to a `class`, `test_name` or `module`.
+ifdef test_name
+	@docker-compose exec app pytest ${module}/tests.py::${class}::${test_name}
 else ifdef class
-	@docker-compose exec app pytest tests/${file}::${class}
-else ifdef file
-	@docker-compose exec app pytest tests/${file}
+	@docker-compose exec app pytest ${module}/tests.py::${class}
+else ifdef module
+	@docker-compose exec app pytest -k ${module}
 else
 	@docker-compose exec app pytest
 endif
