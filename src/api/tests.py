@@ -175,7 +175,6 @@ class TestConversion:
             result = client.get(
                 path=reverse('api.currency_conversion'),
                 data={'from': from_currency, 'to': to_currency, 'amount': amount}
-
             )
             assert result.status_code == status.HTTP_200_OK
 

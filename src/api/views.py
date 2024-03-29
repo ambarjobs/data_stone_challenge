@@ -1,12 +1,20 @@
 import rest_framework.status as status
+from django.conf import settings
+from django.core.cache import caches
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .logic import ExchangeApi
 
+
 class Conversion(APIView):
     """Conversion resource."""
 
+    @method_decorator(
+        cache_page(timeout=settings.EXCHANGE_RATES_CACHE_TIMEOUT, key_prefix='api_conversion_get')
+    )
     def get(self, request):
         """Get currency conversion."""
         required_parameters = ['from', 'to', 'amount']
@@ -55,3 +63,13 @@ class Conversion(APIView):
             'last_update': last_update,
         }
         return Response(data=response)
+
+
+class CacheClear(APIView):
+    """Cache clear utility"""
+
+    def post(self, request):
+        """Clear Django cache for manual tests purpose."""
+        cache = caches['default']
+        result = cache.clear()
+        return Response(data={'cache_cleared': result})

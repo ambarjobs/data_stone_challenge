@@ -72,6 +72,12 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "data_stone.wsgi.application"
 
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": "redis://ds-redis:6379",
+    }
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
@@ -146,5 +152,8 @@ CURRENCY_LIST = [
 # (usually they're paid and untransferable even if free).
 EXCHANGE_RATES_API_URL = 'https://cdn.moeda.info/api/latest.json'
 
-# Exchange rates external API requests timeout.
+# Exchange rates external API requests timeout (seconds).
 EXCHANGE_RATES_API_TIMEOUT = 5
+
+# Exchange rates external API cache retention time (seconds).
+EXCHANGE_RATES_CACHE_TIMEOUT = 30 * 60
