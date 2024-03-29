@@ -5,12 +5,13 @@ from typing import Any
 
 import httpx
 import pytest
-from django.conf import settings
+
+from api.models import Currency
 
 @pytest.fixture
 def currency_list() -> list[str]:
-    """List of app available currencies."""
-    return settings.CURRENCY_LIST
+    """List of available currencies for app."""
+    return Currency.cached_acronyms_list()
 
 @pytest.fixture
 def httpx_get_request() -> httpx.Request:

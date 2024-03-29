@@ -140,6 +140,11 @@ showmigrations: ## Show current migrations status.
 shell: ## Django shell inside app container.
 	@docker-compose exec app ./manage.py shell
 
+# --------------------------------------------------------------------------------------------------
+.PHONY: create_admin_superuser
+create_admin_superuser: ## Create a Django admin superuser.
+	@docker-compose exec app ./manage.py createsuperuser
+
 # ==================================================================================================
 #  PostgreSQL commands
 # --------------------------------------------------------------------------------------------------

@@ -8,6 +8,7 @@ from json.decoder import JSONDecodeError
 
 from django.conf import settings
 
+from .models import Currency
 from .serializers import ExchangeApiInputSerializer
 
 
@@ -44,7 +45,7 @@ class ExchangeApi:
         self.exchange_rates = {
             currency_name: float(exchange_rate)
             for currency_name, exchange_rate in data.get('rates').items()
-            if currency_name in settings.CURRENCY_LIST
+            if currency_name in Currency.cached_acronyms_list()
         }
 
     def get_exchange_rates(self) -> OutputStatus:

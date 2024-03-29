@@ -149,15 +149,6 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 #   Application specific
 #===================================================================================================
 
-# Just temporary.
-CURRENCY_LIST = [
-    'USD',
-    'BRL',
-    'EUR',
-    'BTC',
-    'ETH',
-]
-
 # This simple exchange rates API that doesn't uses an API key
 # (usually they're paid and untransferable even if free).
 EXCHANGE_RATES_API_URL = 'https://cdn.moeda.info/api/latest.json'
@@ -167,3 +158,6 @@ EXCHANGE_RATES_API_TIMEOUT = 5
 
 # Exchange rates external API cache retention time (seconds).
 EXCHANGE_RATES_CACHE_TIMEOUT = 30 * 60
+
+# Acronyms list cache retention time (seconds).
+ACRONYMS_LIST_CACHE_TIMEOUT = 10 * 60
