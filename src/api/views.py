@@ -13,7 +13,10 @@ class Conversion(APIView):
     """Conversion resource."""
 
     @method_decorator(
-        cache_page(timeout=settings.EXCHANGE_RATES_CACHE_TIMEOUT, key_prefix='api_conversion_get')
+        cache_page(
+            timeout=settings.EXCHANGE_RATES_CACHE_TIMEOUT,
+            key_prefix='api_conversion_get'
+        )
     )
     def get(self, request):
         """Get currency conversion."""
@@ -37,7 +40,9 @@ class Conversion(APIView):
         for currency_name in [from_currency_name, to_currency_name]:
             if currency_name not in exchange_rates:
                 return Response(
-                    data={'error': f'The currency [{currency_name}] is not available for conversion.'},
+                    data={
+                        'error': f'The currency [{currency_name}] is not available for conversion.'
+                    },
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
