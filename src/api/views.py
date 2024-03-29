@@ -3,6 +3,7 @@ from django.conf import settings
 from django.core.cache import caches
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
+from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -20,6 +21,9 @@ class Conversion(APIView):
     )
     def get(self, request):
         """Get currency conversion."""
+        # Fix class `renderer_classes` being tampered by `cache_page` decorator
+        self.__class__.renderer_classes = [JSONRenderer]
+
         required_parameters = ['from', 'to', 'amount']
         if not all([param in request.query_params for param in required_parameters]):
             return Response(
