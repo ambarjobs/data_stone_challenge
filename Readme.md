@@ -33,8 +33,8 @@ O código deve rodar em Linux Ubuntu (preferencialmente dentro de um container D
 
 Para executar o seu código deve ser preciso apenas rodar os seguintes comandos:
 
-- git clone $seu-fork
-- cd $seu-fork
+- `git clone $seu-fork`
+- `cd $seu-fork`
 - comando para instalar as dependências
 - comando para executar a aplicação
 
@@ -45,8 +45,8 @@ Para executar o seu código deve ser preciso apenas rodar os seguintes comandos:
 O código deve ser baixado do repositório do projeto
 
 ```shell
-git clone *********
-cd *********
+git clone https://github.com/ambarjobs/data_stone_challenge
+cd data_stone_challenge
 ```
 
 ### Docker
@@ -80,7 +80,7 @@ Parâmetros sigilosos de configuração, como usuários e senhas da base de dado
 
 Essas variáveis de ambiente serão lidas de um arquivo `.env` (**não** incluso no repositório, por questão de segurança) e inseridas no ambiente do docker .
 
-Existe um modelo (`.env_template`), com valores vazios, no diretório raiz do projeto que deve ser copiado para `.env` no mesmo diretório e preenchido com os valores sigilosos (cuidado com uso de caracteres especiais no shell, ex: `'`).
+Existe um modelo (`.env_template`), com valores vazios, no diretório raiz do projeto que deve ser copiado para um arquivo `.env` no mesmo diretório e preenchido com os valores sigilosos (cuidado com uso de caracteres especiais no shell, ex: `'`).
 
 **IMPORTANTE**:
 
@@ -130,7 +130,7 @@ http://localhost:8000/api/cache/clear/
 
 A lista de moedas disponíveis para conversão estão armazenadas numa tabela, representada pelo modelo `Currency`.
 
-O modelo está disponível no admin do Django, de modo que é possível acrescentar moedas adicionais ou remover as existentes além das indicadas na especificação do problema, que já foram inseridas automaticamente através de uma migration do Django.
+A tabela está disponível no admin do Django, de modo que é possível acrescentar moedas adicionais ou remover as existentes além das indicadas na especificação do problema, que já foram inseridas automaticamente através de uma migration do Django.
 
 Este modelo possui um método de classe que permite a obtenção da lista das moedas e utiliza o Redis como cache, de maneira que a operação normal do sistema não sobrecarregue a base de dados.
 
@@ -186,13 +186,13 @@ Isso facilita tanto o desenvolvimento como a utilização do ambiente do desafio
 
 Como indicado acima, para evitar problems de desempenho e sobrecarga de chamadas à API de obtenção de taxas de câmbio, foi usado o cache do Django (usando Redis), para cachear as requisições àquela API.
 
-Do mesmo modo, o acesso à lista de moedas suportadas pela aplicação poderia impor uma carga desnecessária á tabela de moedas (`Currency`), por isso criei um método de classe que usa diretamente o Redis para cachear também esse resultado.
+Do mesmo modo, o acesso à lista de moedas suportadas pela aplicação poderia impor uma carga desnecessária á tabela de moedas (`Currency`), por isso criei um método de classe (`cached_acronyms_list()`) que usa diretamente o Redis para cachear também esse resultado.
 
 A API externa para obtenção das taxas de câmbio atualizadas que escolhi foi a do URL https://cdn.moeda.info/api/latest.json, conforme configurado em `settings.EXCHANGE_RATES_API_URL`, pois foi a única que encontrei completamente gratuita e sem limitações, embora seja uma API mais simples e atualizada a cada hora.
 
 Essa API é tem como lastro o `USD` (como solicitado) e foi talvez a única a fornecer cotação do `ETH`(Ethereum).
 
-A decisão de usar uma tabela apenas para guardar os acrônimos das moedas se baseou no fato de que já temos a atualização das cotações através da API e assim me pareceu de pouca valia guardar as taxas na tabela.
+A decisão de usar uma tabela apenas para guardar os acrônimos das moedas se baseou no fato de que já temos a atualização das cotações através da API e assim me pareceu de pouca valia guardar as taxas na tabela (mas isso dependeria da finalidade de uma aplicação real).
 
 Mesmo em caso de indisponibilidade da API de taxas talvez faça mais sentido não fazer a conversão do que a fazer com dados desatualizados (mas isso dependeria da aplicação real e aqui é apenas um desafio).
 
@@ -202,6 +202,8 @@ Não consegui encontrar a informação de como fazê-lo através do cache do Dja
 
 Para a API usei um serializador apenas para validar os dados de entrada, uma vez que a saída era simples e desvinculada de um modelo não vi necessidade de usar um serializador para isso.
 
+Anotação de tipos do Python foi usado esporadicamente, porém não em todo o código.
+
 ### Limitações do desafio
 
 A maioria das limitações abaixo (se não todas) devem-se principalmente ao escopo reduzido do projeto e à necessidade de administrar o tempo para completá-lo com qualidade.
@@ -210,8 +212,15 @@ A maioria das limitações abaixo (se não todas) devem-se principalmente ao esc
 
 - Não foram criados certificados e não foram configuradas conexões TLS / HTTPS para os serviços.
 
+- Não foi usado nenhum mecanismo de autenticação para acesso aos endpoints.
+
 - Como indicado anteriormente, as taxas de câmbio não foram armazenadas localmente, pois sua utilidade poderia ser limitada e isso não fazia parte do escopo do desafio de forma clara.
 
 - Apesar de que houveram validação e restrições na entrada de dados das moedas na tabela pelo admin do Django, ainda poderiam ter sido verificada se a moeda entrada existe na API externa.
 
 - O Redis não foi configurado com usuário e senha para acesso seguro ao cache (que no caso descrito não possui informações confidenciais).
+
+- Talvez mais alguns testes devessem tem sido criados para o cacheamento do modelo e o validador do serializador.
+
+- Acabei criando o repositório e fazendo o `git push` só no final do projeto (me esqueci da solicitação dos commits).
+  Assim juntei ao repositório um arquivo compactado (`git_commits.tar.gz`) com o diretório `.git`, que pode ser acrescentado ao diretório onde o projeto for clonado para fornecer o histórico de commits.
