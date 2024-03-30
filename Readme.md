@@ -221,6 +221,3 @@ A maioria das limitações abaixo (se não todas) devem-se principalmente ao esc
 - O Redis não foi configurado com usuário e senha para acesso seguro ao cache (que no caso descrito não possui informações confidenciais).
 
 - Talvez mais alguns testes devessem tem sido criados para o cacheamento do modelo e o validador do serializador.
-
-- Acabei criando o repositório e fazendo o `git push` só no final do projeto (me esqueci da solicitação dos commits).
-  Assim juntei ao repositório um arquivo compactado (`git_commits.tar.gz`) com o diretório `.git`, que pode ser acrescentado ao diretório onde o projeto for clonado para fornecer o histórico de commits.
